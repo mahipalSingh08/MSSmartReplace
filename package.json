@@ -1,0 +1,65 @@
+{
+  "name": "mssmartreplace",
+  "displayName": "MSSmartReplace",
+  "description": "Smart Replace: Exact textual replacement manifests for deterministic undo.",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "msreplace.replaceAll",
+        "title": "Smart Replace: Find & Replace All"
+      },
+      {
+        "command": "msreplace.undo",
+        "title": "Smart Replace: Undo Operation..."
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "msreplace-explorer",
+          "title": "Smart Replace",
+          "icon": "$(history)"
+        }
+      ]
+    },
+    "views": {
+      "msreplace-explorer": [
+        {
+          "id": "msreplace.historyView",
+          "name": "History"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "msreplace.undo",
+          "when": "view == msreplace.historyView && viewItem == operation",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "18.x",
+    "typescript": "^5.1.3"
+  }
+}
