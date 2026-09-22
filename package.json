@@ -3,6 +3,7 @@
   "displayName": "MSSmartReplace",
   "description": "Smart Replace: Exact textual replacement manifests for deterministic undo.",
   "version": "0.1.0",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.80.0"
   },

@@ -63,4 +63,4 @@ Feel free to check the [issues page](https://github.com/mahipalSingh08/MSSmartRe
 
 ## 📝 License
 
-This project is [MIT](LICENSE) licensed. Created by [Mahipal Singh](https://github.com/mahipalSingh08).
+This project is [MIT](LICENSE) licensed. Created by [Mahipal Singh](https://mahipal.tech/).
