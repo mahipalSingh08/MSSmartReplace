@@ -31,6 +31,17 @@ export function activate(context: vscode.ExtensionContext) {
             historyTreeProvider.refresh();
         })
     );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('msreplace.redo', async (item?: OperationItem) => {
+            if (item && item.manifest) {
+                await undoManager.redo(item.manifest.id);
+            } else {
+                await undoManager.redo();
+            }
+            historyTreeProvider.refresh();
+        })
+    );
 }
 
 export function deactivate() {}

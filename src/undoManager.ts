@@ -126,4 +126,116 @@ export class UndoManager {
             }
         });
     }
+
+    public async redo(manifestId?: string) {
+        let manifest: Manifest | undefined;
+
+        if (manifestId) {
+            manifest = this.manifestManager.getManifest(manifestId);
+        } else {
+            const manifests = this.manifestManager.getManifests().filter(m => m.reverted);
+            if (manifests.length === 0) {
+                vscode.window.showInformationMessage('No reverted Smart Replace operations to redo.');
+                return;
+            }
+
+            const items = manifests.map(m => {
+                const date = new Date(m.timestamp);
+                return {
+                    label: `${m.findText} → ${m.replaceText}`,
+                    description: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`,
+                    detail: `${m.matches.length} matches in scope: ${m.scope}`,
+                    manifest: m
+                };
+            });
+
+            const selected = await vscode.window.showQuickPick(items, {
+                placeHolder: 'Select an operation to redo'
+            });
+
+            if (!selected) return;
+            manifest = selected.manifest;
+        }
+
+        if (!manifest) {
+            vscode.window.showErrorMessage('Manifest not found.');
+            return;
+        }
+
+        if (!manifest.reverted) {
+            vscode.window.showWarningMessage('This operation is already active (not reverted).');
+            return;
+        }
+
+        vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Smart Replace: Redoing operation...",
+            cancellable: false
+        }, async (progress) => {
+            const workspaceEdit = new vscode.WorkspaceEdit();
+            let skippedLocations = 0;
+            let appliedLocations = 0;
+
+            // Group matches by file for efficiency
+            const matchesByFile = new Map<string, typeof manifest.matches>();
+            for (const match of manifest.matches) {
+                if (!matchesByFile.has(match.filePath)) {
+                    matchesByFile.set(match.filePath, []);
+                }
+                matchesByFile.get(match.filePath)!.push(match);
+            }
+
+            for (const [filePath, fileMatches] of matchesByFile.entries()) {
+                try {
+                    const uri = vscode.Uri.file(filePath);
+                    const document = await vscode.workspace.openTextDocument(uri);
+                    
+                    const lines = document.getText().split(/\r?\n/);
+
+                    for (const match of fileMatches) {
+                        const lineText = lines[match.lineNumber];
+                        
+                        // We expect the line to contain: contextBefore + originalText + contextAfter
+                        const expectedSnippet = match.contextBefore + match.originalText + match.contextAfter;
+                        
+                        if (lineText && lineText.includes(expectedSnippet)) {
+                            // Find where the snippet starts in the current line
+                            const snippetIdx = lineText.indexOf(expectedSnippet);
+                            // Calculate the exact start and end of the originalText within that snippet
+                            const currentStartChar = snippetIdx + match.contextBefore.length;
+                            const currentEndChar = currentStartChar + match.originalText.length;
+                            
+                            const startPos = new vscode.Position(match.lineNumber, currentStartChar);
+                            const endPos = new vscode.Position(match.lineNumber, currentEndChar);
+                            
+                            workspaceEdit.replace(uri, new vscode.Range(startPos, endPos), match.replacedText);
+                            appliedLocations++;
+                        } else {
+                            skippedLocations++;
+                        }
+                    }
+                } catch (e) {
+                    skippedLocations += fileMatches.length;
+                }
+                
+                progress.report({ increment: (1 / matchesByFile.size) * 100 });
+            }
+
+            const success = await vscode.workspace.applyEdit(workspaceEdit);
+            if (success) {
+                manifest.reverted = false;
+                await this.manifestManager.saveManifest(manifest);
+                
+                let msg = `Successfully redid ${appliedLocations} locations.`;
+                if (skippedLocations > 0) {
+                    msg += ` ${skippedLocations} locations skipped due to drift — please review manually.`;
+                    vscode.window.showWarningMessage(msg);
+                } else {
+                    vscode.window.showInformationMessage(msg);
+                }
+            } else {
+                vscode.window.showErrorMessage('Failed to apply redo edits.');
+            }
+        });
+    }
 }

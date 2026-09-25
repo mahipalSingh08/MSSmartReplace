@@ -28,26 +28,12 @@ If the file has drifted (e.g., you edited the lines surrounding the match), the 
 
 ## 🚀 Installation
 
-*Note: This extension is currently in development. You can install it locally by building from source.*
+You can install **MSSmartReplace** directly from the VS Code Marketplace:
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/mahipalSingh08/MSSmartReplace.git
-   cd MSSmartReplace
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Compile the extension:
-   ```bash
-   npm run compile
-   ```
-4. Package into a VSIX file (requires `vsce`):
-   ```bash
-   npx vsce package
-   ```
-5. Install the generated `.vsix` file in VS Code (`Extensions: Install from VSIX...`).
+1. Open VS Code.
+2. Go to the **Extensions** view (`Ctrl+Shift+X` or `Cmd+Shift+X` on macOS).
+3. Search for **"MSSmartReplace"**.
+4. Click **Install**.
 
 ## 🛠️ Usage
 

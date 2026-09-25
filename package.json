@@ -20,7 +20,13 @@
       },
       {
         "command": "msreplace.undo",
-        "title": "Smart Replace: Undo Operation..."
+        "title": "Smart Replace: Undo Operation...",
+        "icon": "$(undo)"
+      },
+      {
+        "command": "msreplace.redo",
+        "title": "Smart Replace: Redo Operation...",
+        "icon": "$(redo)"
       }
     ],
     "viewsContainers": {
@@ -44,7 +50,12 @@
       "view/item/context": [
         {
           "command": "msreplace.undo",
-          "when": "view == msreplace.historyView && viewItem == operation",
+          "when": "view == msreplace.historyView && viewItem == operation_active",
+          "group": "inline"
+        },
+        {
+          "command": "msreplace.redo",
+          "when": "view == msreplace.historyView && viewItem == operation_reverted",
           "group": "inline"
         }
       ]

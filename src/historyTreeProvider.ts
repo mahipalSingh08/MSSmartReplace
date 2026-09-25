@@ -48,7 +48,7 @@ export class OperationItem extends HistoryItem {
         this.tooltip = `Replaced ${manifest.matches.length} occurrences in ${new Set(manifest.matches.map(m => m.filePath)).size} files`;
         const date = new Date(manifest.timestamp);
         this.description = `${date.toLocaleDateString()} ${date.toLocaleTimeString()} ${manifest.reverted ? '(Reverted)' : ''}`;
-        this.contextValue = 'operation';
+        this.contextValue = manifest.reverted ? 'operation_reverted' : 'operation_active';
         this.iconPath = new vscode.ThemeIcon('history');
     }
 }
